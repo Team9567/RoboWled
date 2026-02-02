@@ -1,0 +1,146 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'edu.wpi.first.wpilib.repositories.WPILibRepositoriesPlugin' version '2025.0'
+}
+
+// WPILib Version
+ext.wpilibVersion = "2026.2.1"
+ext.pubVersion = System.getenv("releaseVersion") ?: System.getenv("releaseName") ?: "0.0.1-SNAPSHOT"
+
+group = 'com.github.team9567'
+version = pubVersion
+
+repositories {
+    mavenCentral()
+}
+
+if (project.hasProperty('releaseMode')) {
+    wpilibRepositories.addAllReleaseRepositories(project)
+} else {
+    wpilibRepositories.addAllDevelopmentRepositories(project)
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+    withSourcesJar()
+    withJavadocJar()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'robowled/java'
+        }
+    }
+}
+
+dependencies {
+    // WPILib dependencies (provided by the consuming robot project)
+    compileOnly "edu.wpi.first.wpilibj:wpilibj-java:$wpilibVersion"
+    compileOnly "edu.wpi.first.wpiutil:wpiutil-java:$wpilibVersion"
+    compileOnly "edu.wpi.first.hal:hal-java:$wpilibVersion"
+    
+    // Jackson for JSON serialization (included in artifact)
+    implementation "com.fasterxml.jackson.core:jackson-annotations:2.19.2"
+    implementation "com.fasterxml.jackson.core:jackson-core:2.19.2"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.19.2"
+
+    // Test dependencies
+    testImplementation platform("org.junit:junit-bom:5.11.4")
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testImplementation "org.junit.jupiter:junit-jupiter-params"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+    testImplementation "org.mockito:mockito-core:5.3.1"
+    testImplementation "org.mockito:mockito-junit-jupiter:5.3.1"
+    
+    // WPILib for tests
+    testImplementation "edu.wpi.first.wpilibj:wpilibj-java:$wpilibVersion"
+    testImplementation "edu.wpi.first.wpiutil:wpiutil-java:$wpilibVersion"
+    testImplementation "edu.wpi.first.hal:hal-java:$wpilibVersion"
+}
+
+test {
+    useJUnitPlatform()
+    systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+    testLogging {
+        events "failed"
+        exceptionFormat = "full"
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs.add '-XDstringConcat=inline'
+    options.encoding = 'UTF-8'
+}
+
+javadoc {
+    title = "RoboWled"
+    options {
+        links "https://docs.oracle.com/en/java/javase/17/docs/api/",
+              'https://github.wpilib.org/allwpilib/docs/release/java/'
+        tags 'todo:X:',
+             'apiNote:a:API Note:',
+             'implSpec:a:Implementation Requirements:',
+             'implNote:a:Implementation Note:'
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            
+            groupId = 'com.github.team9567'
+            artifactId = 'robowled'
+            version = pubVersion
+            
+            pom {
+                name = 'RoboWled'
+                description = 'A WPILib-compatible library for controlling WLED LED strips on FRC robots'
+                url = 'https://github.com/Team9567/RoboWled'
+                
+                licenses {
+                    license {
+                        name = 'GNU Lesser General Public License v3.0'
+                        url = 'https://www.gnu.org/licenses/lgpl-3.0.html'
+                    }
+                }
+                
+                developers {
+                    developer {
+                        id = 'team9567'
+                        name = 'Team 9567'
+                    }
+                }
+                
+                scm {
+                    connection = 'scm:git:git://github.com/Team9567/RoboWled.git'
+                    developerConnection = 'scm:git:ssh://github.com/Team9567/RoboWled.git'
+                    url = 'https://github.com/Team9567/RoboWled'
+                }
+            }
+        }
+    }
+    
+    repositories {
+        maven {
+            name = 'GitHubPackages'
+            url = uri('https://maven.pkg.github.com/Team9567/RoboWled')
+            credentials {
+                username = System.getenv("GITHUB_ACTOR") ?: findProperty("gpr.user") ?: ""
+                password = System.getenv("GITHUB_TOKEN") ?: findProperty("gpr.token") ?: ""
+            }
+        }
+        maven {
+            name = 'local'
+            url = layout.buildDirectory.dir('maven')
+        }
+    }
+}
+
+wrapper {
+    gradleVersion = '8.14.3'
+}

@@ -23,38 +23,24 @@
 
 ---
 
-## 📦 Installation (WPILib Vendordep)
+## 📦 Installation
 
-1. In **VS Code** with WPILib extension:
-   - Open Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
-   - Select: `WPILib: Manage Vendor Libraries`
-   - Choose `Install new library (online or offline)`
-   - Select **Online**
-   - Paste the URL to the RoboWled vendordep JSON file, e.g.:
-     `https://team9567.github.io/RoboWled/RoboWled.json`
-   - Press Enter to install
-
----
-
-
-## 📂 Examples
-
-The repository contains several example projects under the `/examples` folder demonstrating how to use RoboWled for showing patterns, and linking pattern changes to robot triggers.
-
-These example projects do **not** include RoboWled as a dependency via Maven or vendordep directly. Instead, they use a modified `build.gradle` that links the RoboWled source code located in the `/robowled` folder relative to the example.
-
-This is done by adding the following snippet to the `sourceSets` block in each example’s `build.gradle`:
+Add RoboWled to your robot project's `build.gradle`:
 
 ```groovy
-sourceSets {
-    main {
-        java {
-            srcDirs 'src/main/java'
-            srcDirs '../../robowled/'
-        }
-    }
+repositories {
+    // Add the RoboWled Maven repository
+    maven { url 'https://team9567.github.io/RoboWled/' }
+}
+
+dependencies {
+    implementation 'com.github.team9567:robowled:VERSION'
 }
 ```
+
+Replace `VERSION` with the desired version (e.g., `1.0.0`).
+
+---
 
 ## 📜 License
 
