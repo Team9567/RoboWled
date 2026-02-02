@@ -1,0 +1,21 @@
+{
+    "fileName": "RoboWled.json",
+    "name": "RoboWled Robot API for WLED-based lighting control",
+    "version": "${version}",
+    "frcYear": "2026",
+    "uuid": "e5339538-6562-463f-836e-8da78e23f36b",
+    "mavenUrls": [
+        "https://team9567.github.io/RoboWled/releases/"
+    ],
+    "jsonUrl": "https://team9567.github.io/RoboWled/RoboWled.json",
+    "javaDependencies": [
+        {
+            "groupId": "${groupId}",
+            "artifactId": "${artifactId}-java",
+            "version": "${version}"
+        }
+    ],
+    "cppDependencies": [],
+    "jniDependencies": [],
+    "requires": []
+}
