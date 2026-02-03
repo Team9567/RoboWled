@@ -38,7 +38,7 @@ jobs:
       - name: Upload Maven artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: maven-${{ env.releaseVersion }}
+          name: maven-artifacts
           path: build/maven/
 
   deploy-pages:
@@ -69,7 +69,7 @@ jobs:
       - name: Download Maven artifacts
         uses: actions/download-artifact@v4
         with:
-          name: maven-${{ inputs.releaseVersion || github.event.release.tag_name }}
+          name: maven-artifacts
           path: _site/releases
       
       - name: List site contents for debugging
@@ -79,7 +79,8 @@ jobs:
           echo "=== _site/releases contents ==="
           ls -la _site/releases/ || echo "releases dir not found"
           echo "=== Maven structure ==="
-          find _site/releases -name "*.pom" 2>/dev/null || echo "No pom files found"
+          find _site/releases -type f -name "*.pom" 2>/dev/null || echo "No pom files found"
+          find _site/releases -type f -name "*.jar" 2>/dev/null || echo "No jar files found"
       
       - name: Setup Pages
         uses: actions/configure-pages@v5
