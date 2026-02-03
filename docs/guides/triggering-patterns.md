@@ -483,7 +483,7 @@ public class LedSubsystem extends SubsystemBase {
 
 ## Next Steps
 
-- [SerialPipe API](../api/serial-pipe.md) - Full API reference
-- [NetworkPipe API](../api/network-pipe.md) - Network connection details
+- [SerialPipe API](../api/serial-pipe.html) - Full API reference
+- [NetworkPipe API](../api/network-pipe.html) - Network connection details
 - [WLED Effects](https://kno.wled.ge/features/effects/) - Browse all available effects
 

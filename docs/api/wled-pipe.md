@@ -16,9 +16,9 @@ robowled.wledpipe.WledPipe
 
 | Class | Description |
 |-------|-------------|
-| [SerialPipe](serial-pipe.md) | USB/serial communication |
-| [NetworkPipe](network-pipe.md) | TCP/IP network communication |
-| [DummyPipe](dummy-pipe.md) | Mock pipe for testing and simulation |
+| [SerialPipe](serial-pipe.html) | USB/serial communication |
+| [NetworkPipe](network-pipe.html) | TCP/IP network communication |
+| [DummyPipe](dummy-pipe.html) | Mock pipe for testing and simulation |
 
 ## Interface Methods
 
@@ -179,8 +179,8 @@ assertEquals(200, mockPipe.getStateValue("bri", Integer.class));
 
 ## See Also
 
-- [SerialPipe](serial-pipe.md) - USB serial implementation
-- [NetworkPipe](network-pipe.md) - Network implementation
-- [DummyPipe](dummy-pipe.md) - Mock implementation for testing
-- [Simulation & Testing Guide](../guides/simulation-testing.md)
+- [SerialPipe](serial-pipe.html) - USB serial implementation
+- [NetworkPipe](network-pipe.html) - Network implementation
+- [DummyPipe](dummy-pipe.html) - Mock implementation for testing
+- [Simulation & Testing Guide](../guides/simulation-testing.html)
 

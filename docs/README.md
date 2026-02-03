@@ -39,7 +39,7 @@ wled.sendString("{\"ps\":1}\n");
 
 ## Getting Started
 
-Ready to add some lights to your robot? Head over to the [Installation](installation.md) guide to get started!
+Ready to add some lights to your robot? Head over to the [Installation](installation.html) guide to get started!
 
 ## License
 

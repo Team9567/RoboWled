@@ -6,7 +6,7 @@ This guide will walk you through creating your first WLED-controlled lighting sy
 
 Before you begin, make sure you have:
 
-1. [Installed RoboWled](installation.md) in your robot project
+1. [Installed RoboWled](installation.html) in your robot project
 2. A WLED controller connected to LEDs and configured
 3. Either a USB cable or network connection between the roboRIO and WLED
 
@@ -135,7 +135,7 @@ This allows you to:
 - Use `SerialPipe` or `NetworkPipe` for real hardware
 - Use `DummyPipe` for simulation and testing
 
-See [Simulation & Testing](guides/simulation-testing.md) for details.
+See [Simulation & Testing](guides/simulation-testing.html) for details.
 
 ## Example: Alliance-Based Colors
 
@@ -217,11 +217,11 @@ public RobotContainer() {
 
 ## Next Steps
 
-- Learn about the [WledPipe Interface](api/wled-pipe.md)
-- Learn more about the [SerialPipe API](api/serial-pipe.md)
-- Learn more about the [NetworkPipe API](api/network-pipe.md)
-- Use [DummyPipe](api/dummy-pipe.md) for simulation and testing
-- Explore [Sending Commands](guides/sending-commands.md) for advanced WLED control
-- Check out [Triggering Patterns](guides/triggering-patterns.md) for game-state integration
-- Learn about [Simulation & Testing](guides/simulation-testing.md)
+- Learn about the [WledPipe Interface](api/wled-pipe.html)
+- Learn more about the [SerialPipe API](api/serial-pipe.html)
+- Learn more about the [NetworkPipe API](api/network-pipe.html)
+- Use [DummyPipe](api/dummy-pipe.html) for simulation and testing
+- Explore [Sending Commands](guides/sending-commands.html) for advanced WLED control
+- Check out [Triggering Patterns](guides/triggering-patterns.html) for game-state integration
+- Learn about [Simulation & Testing](guides/simulation-testing.html)
 

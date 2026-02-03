@@ -2,7 +2,7 @@
 
 Serial-based communication pipe for WLED devices. Communicates over USB serial, sending and receiving newline-delimited JSON.
 
-Implements the [WledPipe](wled-pipe.md) interface.
+Implements the [WledPipe](wled-pipe.html) interface.
 
 ## Package
 
@@ -47,7 +47,7 @@ SerialPipe wled = new SerialPipe(SerialPort.Port.kUSB, 115200);
 
 ## Methods
 
-*All methods are defined by the [WledPipe](wled-pipe.md) interface.*
+*All methods are defined by the [WledPipe](wled-pipe.html) interface.*
 
 ### sendObject(Object obj)
 
@@ -221,9 +221,9 @@ public class LedSubsystem extends SubsystemBase {
 
 ## See Also
 
-- [WledPipe Interface](wled-pipe.md) - The interface SerialPipe implements
-- [NetworkPipe](network-pipe.md) - For TCP/IP network connections
-- [DummyPipe](dummy-pipe.md) - For testing and simulation
-- [Getting Started](../getting-started.md) - Basic usage guide
+- [WledPipe Interface](wled-pipe.html) - The interface SerialPipe implements
+- [NetworkPipe](network-pipe.html) - For TCP/IP network connections
+- [DummyPipe](dummy-pipe.html) - For testing and simulation
+- [Getting Started](../getting-started.html) - Basic usage guide
 - [WLED JSON API](https://kno.wled.ge/interfaces/json-api/) - Official WLED documentation
 

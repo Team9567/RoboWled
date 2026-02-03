@@ -2,7 +2,7 @@
 
 Network-based communication pipe for WLED devices. Communicates over TCP, sending and receiving newline-delimited JSON.
 
-Implements the [WledPipe](wled-pipe.md) interface.
+Implements the [WledPipe](wled-pipe.html) interface.
 
 ## Package
 
@@ -360,9 +360,9 @@ public class LedSubsystem extends SubsystemBase {
 
 ## See Also
 
-- [WledPipe Interface](wled-pipe.md) - The interface NetworkPipe implements
-- [SerialPipe](serial-pipe.md) - For USB serial connections
-- [DummyPipe](dummy-pipe.md) - For testing and simulation
-- [Getting Started](../getting-started.md) - Basic usage guide
+- [WledPipe Interface](wled-pipe.html) - The interface NetworkPipe implements
+- [SerialPipe](serial-pipe.html) - For USB serial connections
+- [DummyPipe](dummy-pipe.html) - For testing and simulation
+- [Getting Started](../getting-started.html) - Basic usage guide
 - [WLED JSON API](https://kno.wled.ge/interfaces/json-api/) - Official WLED documentation
 

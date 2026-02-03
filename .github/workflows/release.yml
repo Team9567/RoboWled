@@ -35,10 +35,10 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
       - name: Publish to local Maven for Pages
         run: ./gradlew publishMavenPublicationToLocalRepository
-      - name: Upload release artifacts
+      - name: Upload Maven artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: robowled-${{ env.releaseVersion }}
+          name: maven-${{ env.releaseVersion }}
           path: build/maven/
 
   deploy-pages:
@@ -52,17 +52,34 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Download artifacts
+      
+      - name: Download Maven artifacts
         uses: actions/download-artifact@v4
         with:
-          name: robowled-${{ inputs.releaseVersion || github.event.release.tag_name }}
-          path: maven-repo
+          name: maven-${{ inputs.releaseVersion || github.event.release.tag_name }}
+          path: _site/releases
+      
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: docs
+      
+      - name: Build Jekyll site
+        working-directory: docs
+        run: bundle exec jekyll build --destination ../_site --trace
+        env:
+          JEKYLL_ENV: production
+      
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: maven-repo
+          path: _site
+      
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

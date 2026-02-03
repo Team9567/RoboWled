@@ -383,7 +383,7 @@ void testPresetActivation() {
 
 ## See Also
 
-- [DummyPipe API Reference](../api/dummy-pipe.md)
-- [WledPipe Interface](../api/wled-pipe.md)
-- [Getting Started](../getting-started.md)
+- [DummyPipe API Reference](../api/dummy-pipe.html)
+- [WledPipe Interface](../api/wled-pipe.html)
+- [Getting Started](../getting-started.html)
 

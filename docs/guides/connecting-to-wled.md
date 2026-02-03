@@ -282,6 +282,6 @@ public class MultiLedSubsystem extends SubsystemBase {
 
 ## Next Steps
 
-- [Sending Commands](sending-commands.md) - Learn the WLED command format
-- [Triggering Patterns](triggering-patterns.md) - Link patterns to robot events
+- [Sending Commands](sending-commands.html) - Learn the WLED command format
+- [Triggering Patterns](triggering-patterns.html) - Link patterns to robot events
 

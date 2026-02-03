@@ -49,7 +49,7 @@ repositories {
     }
     // Or use GitHub Pages Maven repo (no auth required)
     maven {
-        url = uri('https://team9567.github.io/RoboWled/')
+        url = uri('https://team9567.github.io/RoboWled/releases/')
     }
 }
 

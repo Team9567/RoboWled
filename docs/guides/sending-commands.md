@@ -330,6 +330,6 @@ public void periodic() {
 
 ## Next Steps
 
-- [Triggering Patterns](triggering-patterns.md) - Link LED changes to robot events
+- [Triggering Patterns](triggering-patterns.html) - Link LED changes to robot events
 - [WLED JSON API Docs](https://kno.wled.ge/interfaces/json-api/) - Full API reference
 

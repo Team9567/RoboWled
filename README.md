@@ -7,6 +7,12 @@
 
 ---
 
+## 📖 Documentation
+
+[**View Full Documentation →**](https://team9567.github.io/RoboWled/)
+
+---
+
 ## 🔧 Key Features
 
 - Supports both serial (e.g. via USB-serial) and networked (e.g. via ethernet) channels for control
@@ -14,6 +20,7 @@
 - Pushing raw json configs
 - Building logical representations of settings in pure java, and serializing it into Json
 - Deserializing Json into java objects for programmatic manipulation of settings
+- `DummyPipe` for simulation and unit testing
 
 ---
 
@@ -24,7 +31,7 @@ Add RoboWled to your robot project's `build.gradle`:
 ```groovy
 repositories {
     // Add the RoboWled Maven repository
-    maven { url 'https://team9567.github.io/RoboWled/' }
+    maven { url 'https://team9567.github.io/RoboWled/releases/' }
 }
 
 dependencies {
@@ -44,4 +51,3 @@ You are free to use, modify, and redistribute the software, provided that any de
 See [`LICENSE`](./LICENSE.txt) for full details.
 
 ---
-

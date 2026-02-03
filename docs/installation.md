@@ -13,7 +13,7 @@ repositories {
     mavenCentral()
     
     // Add RoboWled repository
-    maven { url 'https://team9567.github.io/RoboWled/' }
+    maven { url 'https://team9567.github.io/RoboWled/releases/' }
 }
 ```
 
@@ -43,7 +43,7 @@ plugins {
 
 repositories {
     mavenCentral()
-    maven { url 'https://team9567.github.io/RoboWled/' }
+    maven { url 'https://team9567.github.io/RoboWled/releases/' }
 }
 
 dependencies {
@@ -132,4 +132,4 @@ If your project builds without errors, RoboWled is installed correctly!
 
 ## Next Steps
 
-Now that RoboWled is installed, head over to [Getting Started](getting-started.md) to learn how to use it.
+Now that RoboWled is installed, head over to [Getting Started](getting-started.html) to learn how to use it.

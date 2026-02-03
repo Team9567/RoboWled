@@ -1,6 +1,6 @@
 # DummyPipe
 
-A mock pipe for testing and simulation. Implements the [WledPipe](wled-pipe.md) interface without communicating with any real device.
+A mock pipe for testing and simulation. Implements the [WledPipe](wled-pipe.html) interface without communicating with any real device.
 
 ## Package
 
@@ -271,8 +271,8 @@ public class Robot extends TimedRobot {
 
 ## See Also
 
-- [WledPipe Interface](wled-pipe.md) - The interface DummyPipe implements
-- [Simulation & Testing Guide](../guides/simulation-testing.md) - Detailed guide
-- [SerialPipe](serial-pipe.md) - For real serial connections
-- [NetworkPipe](network-pipe.md) - For real network connections
+- [WledPipe Interface](wled-pipe.html) - The interface DummyPipe implements
+- [Simulation & Testing Guide](../guides/simulation-testing.html) - Detailed guide
+- [SerialPipe](serial-pipe.html) - For real serial connections
+- [NetworkPipe](network-pipe.html) - For real network connections
 
