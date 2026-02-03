@@ -1,3 +1,8 @@
+---
+layout: default
+title: DummyPipe
+---
+
 # DummyPipe
 
 A mock pipe for testing and simulation. Implements the [WledPipe](wled-pipe.html) interface without communicating with any real device.

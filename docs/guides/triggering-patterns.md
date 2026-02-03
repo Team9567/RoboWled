@@ -1,3 +1,8 @@
+---
+layout: default
+title: Triggering Patterns
+---
+
 # Triggering Patterns
 
 This guide shows how to link LED patterns to robot events, game states, and sensor inputs.

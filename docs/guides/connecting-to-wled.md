@@ -1,3 +1,8 @@
+---
+layout: default
+title: Connecting to WLED
+---
+
 # Connecting to WLED
 
 This guide covers all the ways to connect your FRC robot to a WLED controller.

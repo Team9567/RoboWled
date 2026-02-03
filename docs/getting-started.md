@@ -1,3 +1,8 @@
+---
+layout: default
+title: Getting Started
+---
+
 # Getting Started
 
 This guide will walk you through creating your first WLED-controlled lighting system on your FRC robot.

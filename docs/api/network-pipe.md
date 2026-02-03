@@ -1,3 +1,8 @@
+---
+layout: default
+title: NetworkPipe
+---
+
 # NetworkPipe
 
 Network-based communication pipe for WLED devices. Communicates over TCP, sending and receiving newline-delimited JSON.

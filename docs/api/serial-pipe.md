@@ -1,3 +1,8 @@
+---
+layout: default
+title: SerialPipe
+---
+
 # SerialPipe
 
 Serial-based communication pipe for WLED devices. Communicates over USB serial, sending and receiving newline-delimited JSON.

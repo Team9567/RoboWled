@@ -1,3 +1,8 @@
+---
+layout: default
+title: WledPipe Interface
+---
+
 # WledPipe Interface
 
 Common interface for all WLED communication pipes.

@@ -1,3 +1,8 @@
+---
+layout: default
+title: Sending Commands
+---
+
 # Sending Commands
 
 This guide covers the WLED JSON API and how to send various commands from your robot code.

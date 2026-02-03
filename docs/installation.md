@@ -1,3 +1,8 @@
+---
+layout: default
+title: Installation
+---
+
 # Installation
 
 ## Adding RoboWled to Your Robot Project

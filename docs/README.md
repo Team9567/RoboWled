@@ -1,3 +1,8 @@
+---
+layout: default
+title: About
+---
+
 # RoboWled
 
 > A WPILib-compatible library for controlling WLED LED strips on FRC robots via serial or network connections.

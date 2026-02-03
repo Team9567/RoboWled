@@ -1,3 +1,8 @@
+---
+layout: default
+title: Simulation & Testing
+---
+
 # Simulation & Testing
 
 This guide covers how to use `DummyPipe` for testing your LED subsystems and running in simulation mode.
