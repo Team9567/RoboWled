@@ -2,6 +2,8 @@
 
 Serial-based communication pipe for WLED devices. Communicates over USB serial, sending and receiving newline-delimited JSON.
 
+Implements the [WledPipe](wled-pipe.md) interface.
+
 ## Package
 
 ```java
@@ -44,6 +46,8 @@ SerialPipe wled = new SerialPipe(SerialPort.Port.kUSB, 115200);
 ---
 
 ## Methods
+
+*All methods are defined by the [WledPipe](wled-pipe.md) interface.*
 
 ### sendObject(Object obj)
 
@@ -168,10 +172,10 @@ import robowled.wledpipe.SerialPipe;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class LEDSubsystem extends SubsystemBase {
+public class LedSubsystem extends SubsystemBase {
     private final SerialPipe wled;
 
-    public LEDSubsystem() {
+    public LedSubsystem() {
         wled = new SerialPipe(SerialPort.Port.kUSB, 115200);
     }
 
@@ -217,7 +221,9 @@ public class LEDSubsystem extends SubsystemBase {
 
 ## See Also
 
+- [WledPipe Interface](wled-pipe.md) - The interface SerialPipe implements
 - [NetworkPipe](network-pipe.md) - For TCP/IP network connections
+- [DummyPipe](dummy-pipe.md) - For testing and simulation
 - [Getting Started](../getting-started.md) - Basic usage guide
 - [WLED JSON API](https://kno.wled.ge/interfaces/json-api/) - Official WLED documentation
 

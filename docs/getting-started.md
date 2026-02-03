@@ -20,10 +20,10 @@ For USB serial connections, create a `SerialPipe`:
 import robowled.wledpipe.SerialPipe;
 import edu.wpi.first.wpilibj.SerialPort;
 
-public class LEDSubsystem extends SubsystemBase {
+public class LedSubsystem extends SubsystemBase {
     private final SerialPipe wled;
 
-    public LEDSubsystem() {
+    public LedSubsystem() {
         // Connect to WLED on USB port at 115200 baud
         wled = new SerialPipe(SerialPort.Port.kUSB, 115200);
     }
@@ -43,10 +43,10 @@ For network connections, create a `NetworkPipe`. You can connect using either an
 ```java
 import robowled.wledpipe.NetworkPipe;
 
-public class LEDSubsystem extends SubsystemBase {
+public class LedSubsystem extends SubsystemBase {
     private NetworkPipe wled;
 
-    public LEDSubsystem() {
+    public LedSubsystem() {
         try {
             // Option A: Connect using mDNS hostname (recommended)
             wled = new NetworkPipe("wled-underglow.local", 21324);
@@ -111,21 +111,46 @@ wled.sendString("{\"seg\":[{\"col\":[[0,255,0]]}]}\n");
 wled.sendString("{\"seg\":[{\"col\":[[0,0,255]]}]}\n");
 ```
 
+## Recommended: Interface-Based Design
+
+For flexibility and testability, design your Led subsystem to accept a `WledPipe` interface instead of a specific implementation:
+
+```java
+import robowled.wledpipe.WledPipe;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+public class LedSubsystem extends SubsystemBase {
+    private final WledPipe wled;
+
+    // Accept any pipe implementation
+    public LedSubsystem(WledPipe wled) {
+        this.wled = wled;
+    }
+    
+    // ... your LED methods
+}
+```
+
+This allows you to:
+- Use `SerialPipe` or `NetworkPipe` for real hardware
+- Use `DummyPipe` for simulation and testing
+
+See [Simulation & Testing](guides/simulation-testing.md) for details.
+
 ## Example: Alliance-Based Colors
 
 Here's a complete example that changes LED colors based on the robot's alliance:
 
 ```java
-import robowled.wledpipe.SerialPipe;
+import robowled.wledpipe.WledPipe;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class LEDSubsystem extends SubsystemBase {
-    private final SerialPipe wled;
+public class LedSubsystem extends SubsystemBase {
+    private final WledPipe wled;
 
-    public LEDSubsystem() {
-        wled = new SerialPipe(SerialPort.Port.kUSB, 115200);
+    public LedSubsystem(WledPipe wled) {
+        this.wled = wled;
     }
 
     public void setAllianceColor() {
@@ -170,7 +195,15 @@ Integrate WLED control with the WPILib command framework:
 ```java
 // In RobotContainer.java
 public RobotContainer() {
-    LEDSubsystem leds = new LEDSubsystem();
+    // Create the appropriate pipe based on runtime mode
+    WledPipe wledPipe;
+    if (RobotBase.isSimulation()) {
+        wledPipe = new DummyPipe(msg -> System.out.println("[WLED] " + msg));
+    } else {
+        wledPipe = new SerialPipe(SerialPort.Port.kUSB, 115200);
+    }
+    
+    LedSubsystem leds = new LedSubsystem(wledPipe);
 
     // Set alliance color when robot is enabled
     new Trigger(DriverStation::isEnabled)
@@ -184,8 +217,11 @@ public RobotContainer() {
 
 ## Next Steps
 
+- Learn about the [WledPipe Interface](api/wled-pipe.md)
 - Learn more about the [SerialPipe API](api/serial-pipe.md)
 - Learn more about the [NetworkPipe API](api/network-pipe.md)
+- Use [DummyPipe](api/dummy-pipe.md) for simulation and testing
 - Explore [Sending Commands](guides/sending-commands.md) for advanced WLED control
 - Check out [Triggering Patterns](guides/triggering-patterns.md) for game-state integration
+- Learn about [Simulation & Testing](guides/simulation-testing.md)
 

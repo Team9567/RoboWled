@@ -27,10 +27,10 @@ This guide covers all the ways to connect your FRC robot to a WLED controller.
 import robowled.wledpipe.SerialPipe;
 import edu.wpi.first.wpilibj.SerialPort;
 
-public class LEDSubsystem extends SubsystemBase {
+public class LedSubsystem extends SubsystemBase {
     private SerialPipe wled;
 
-    public LEDSubsystem() {
+    public LedSubsystem() {
         try {
             wled = new SerialPipe(SerialPort.Port.kUSB, 115200);
         } catch (Exception e) {
@@ -101,13 +101,13 @@ You can also customize the mDNS name in the WLED settings to something memorable
 import robowled.wledpipe.NetworkPipe;
 import java.io.IOException;
 
-public class LEDSubsystem extends SubsystemBase {
+public class LedSubsystem extends SubsystemBase {
     private NetworkPipe wled;
     // Use mDNS hostname instead of IP address
     private static final String WLED_HOST = "wled-underglow.local";
     private static final int WLED_PORT = 21324;
 
-    public LEDSubsystem() {
+    public LedSubsystem() {
         try {
             wled = new NetworkPipe(WLED_HOST, WLED_PORT);
         } catch (IOException e) {
@@ -139,12 +139,12 @@ If you prefer static IPs or mDNS isn't working reliably, configure your WLED wit
 import robowled.wledpipe.NetworkPipe;
 import java.io.IOException;
 
-public class LEDSubsystem extends SubsystemBase {
+public class LedSubsystem extends SubsystemBase {
     private NetworkPipe wled;
     private static final String WLED_IP = "10.95.67.100";
     private static final int WLED_PORT = 21324;
 
-    public LEDSubsystem() {
+    public LedSubsystem() {
         try {
             wled = new NetworkPipe(WLED_IP, WLED_PORT);
         } catch (IOException e) {
@@ -171,14 +171,14 @@ public class LEDSubsystem extends SubsystemBase {
 Both connection types can fail. Here's a robust pattern for handling errors:
 
 ```java
-public class LEDSubsystem extends SubsystemBase {
+public class LedSubsystem extends SubsystemBase {
     private SerialPipe serialWled;
     private NetworkPipe networkWled;
     private boolean connected = false;
     private int reconnectAttempts = 0;
     private static final int MAX_RECONNECT_ATTEMPTS = 5;
 
-    public LEDSubsystem() {
+    public LedSubsystem() {
         connect();
     }
 
@@ -246,12 +246,12 @@ public class LEDSubsystem extends SubsystemBase {
 You can connect to multiple WLED controllers simultaneously:
 
 ```java
-public class MultiLEDSubsystem extends SubsystemBase {
+public class MultiLedSubsystem extends SubsystemBase {
     private final NetworkPipe frontLeds;
     private final NetworkPipe rearLeds;
     private final SerialPipe statusLeds;
 
-    public MultiLEDSubsystem() throws IOException {
+    public MultiLedSubsystem() throws IOException {
         frontLeds = new NetworkPipe("10.95.67.101", 21324);
         rearLeds = new NetworkPipe("10.95.67.102", 21324);
         statusLeds = new SerialPipe(SerialPort.Port.kUSB, 115200);

@@ -23,10 +23,10 @@ Before writing code, plan your LED patterns:
 Create a simple state machine for LED control:
 
 ```java
-public class LEDSubsystem extends SubsystemBase {
+public class LedSubsystem extends SubsystemBase {
     private final SerialPipe wled;
     
-    public enum LEDState {
+    public enum LedState {
         DISABLED,
         IDLE,
         AUTO,
@@ -35,14 +35,14 @@ public class LEDSubsystem extends SubsystemBase {
         ERROR
     }
     
-    private LEDState currentState = LEDState.DISABLED;
-    private LEDState lastState = null;
+    private LedState currentState = LedState.DISABLED;
+    private LedState lastState = null;
 
-    public LEDSubsystem() {
+    public LedSubsystem() {
         wled = new SerialPipe(SerialPort.Port.kUSB, 115200);
     }
 
-    public void setState(LEDState state) {
+    public void setState(LedState state) {
         currentState = state;
     }
 
@@ -55,7 +55,7 @@ public class LEDSubsystem extends SubsystemBase {
         }
     }
 
-    private void applyState(LEDState state) {
+    private void applyState(LedState state) {
         try {
             switch (state) {
                 case DISABLED:
@@ -92,38 +92,38 @@ Integrate with the command-based framework using Triggers:
 
 ```java
 public class RobotContainer {
-    private final LEDSubsystem leds = new LEDSubsystem();
+    private final LedSubsystem leds = new LedSubsystem();
     private final IntakeSubsystem intake = new IntakeSubsystem();
     private final ShooterSubsystem shooter = new ShooterSubsystem();
 
     public RobotContainer() {
-        configureLEDTriggers();
+        configureLedTriggers();
     }
 
-    private void configureLEDTriggers() {
+    private void configureLedTriggers() {
         // Disabled state
         new Trigger(DriverStation::isDisabled)
-            .onTrue(new InstantCommand(() -> leds.setState(LEDState.DISABLED)));
+            .onTrue(new InstantCommand(() -> leds.setState(LedState.DISABLED)));
 
         // Enabled but idle
         new Trigger(DriverStation::isEnabled)
             .and(() -> !intake.hasPiece())
             .and(() -> !shooter.isShooting())
-            .onTrue(new InstantCommand(() -> leds.setState(LEDState.IDLE)));
+            .onTrue(new InstantCommand(() -> leds.setState(LedState.IDLE)));
 
         // Auto mode
         new Trigger(DriverStation::isAutonomousEnabled)
-            .onTrue(new InstantCommand(() -> leds.setState(LEDState.AUTO)));
+            .onTrue(new InstantCommand(() -> leds.setState(LedState.AUTO)));
 
         // Has game piece
         new Trigger(intake::hasPiece)
-            .onTrue(new InstantCommand(() -> leds.setState(LEDState.HAS_PIECE)))
-            .onFalse(new InstantCommand(() -> leds.setState(LEDState.IDLE)));
+            .onTrue(new InstantCommand(() -> leds.setState(LedState.HAS_PIECE)))
+            .onFalse(new InstantCommand(() -> leds.setState(LedState.IDLE)));
 
         // Shooting
         new Trigger(shooter::isShooting)
-            .onTrue(new InstantCommand(() -> leds.setState(LEDState.SHOOTING)))
-            .onFalse(new InstantCommand(() -> leds.setState(LEDState.IDLE)));
+            .onTrue(new InstantCommand(() -> leds.setState(LedState.SHOOTING)))
+            .onFalse(new InstantCommand(() -> leds.setState(LedState.IDLE)));
     }
 }
 ```
@@ -135,7 +135,7 @@ public class RobotContainer {
 Automatically set colors based on alliance:
 
 ```java
-public class LEDSubsystem extends SubsystemBase {
+public class LedSubsystem extends SubsystemBase {
     private final SerialPipe wled;
     private DriverStation.Alliance lastAlliance = null;
 
@@ -171,7 +171,7 @@ public class LEDSubsystem extends SubsystemBase {
 Change patterns based on match time:
 
 ```java
-public class LEDSubsystem extends SubsystemBase {
+public class LedSubsystem extends SubsystemBase {
     private final SerialPipe wled;
     private boolean endgameWarned = false;
     private boolean finalCountdown = false;
@@ -226,12 +226,12 @@ public class LEDSubsystem extends SubsystemBase {
 React to sensor inputs:
 
 ```java
-public class LEDSubsystem extends SubsystemBase {
+public class LedSubsystem extends SubsystemBase {
     private final SerialPipe wled;
     private final DigitalInput beamBreak;
     private boolean lastBeamState = false;
 
-    public LEDSubsystem() {
+    public LedSubsystem() {
         wled = new SerialPipe(SerialPort.Port.kUSB, 115200);
         beamBreak = new DigitalInput(0);
     }
@@ -274,12 +274,12 @@ Create commands for LED patterns:
 
 ```java
 public class FlashColorCommand extends Command {
-    private final LEDSubsystem leds;
+    private final LedSubsystem leds;
     private final int r, g, b;
     private final double duration;
     private final Timer timer = new Timer();
 
-    public FlashColorCommand(LEDSubsystem leds, int r, int g, int b, double seconds) {
+    public FlashColorCommand(LedSubsystem leds, int r, int g, int b, double seconds) {
         this.leds = leds;
         this.r = r;
         this.g = g;
@@ -323,7 +323,7 @@ public Command shootWithFeedback() {
 Handle competing LED requests with priorities:
 
 ```java
-public class LEDSubsystem extends SubsystemBase {
+public class LedSubsystem extends SubsystemBase {
     private final SerialPipe wled;
     
     public enum Priority {
@@ -403,13 +403,13 @@ public void requestPattern(String pattern) {
 Here's a full LED subsystem with all features:
 
 ```java
-public class LEDSubsystem extends SubsystemBase {
+public class LedSubsystem extends SubsystemBase {
     private final SerialPipe wled;
-    private LEDState currentState = LEDState.DISABLED;
-    private LEDState lastState = null;
+    private LedState currentState = LedState.DISABLED;
+    private LedState lastState = null;
     private DriverStation.Alliance currentAlliance = null;
 
-    public enum LEDState {
+    public enum LedState {
         DISABLED(1, 50),
         IDLE(2, 200),
         AUTO(3, 255),
@@ -421,17 +421,17 @@ public class LEDSubsystem extends SubsystemBase {
         final int preset;
         final int brightness;
 
-        LEDState(int preset, int brightness) {
+        LedState(int preset, int brightness) {
             this.preset = preset;
             this.brightness = brightness;
         }
     }
 
-    public LEDSubsystem() {
+    public LedSubsystem() {
         wled = new SerialPipe(SerialPort.Port.kUSB, 115200);
     }
 
-    public void setState(LEDState state) {
+    public void setState(LedState state) {
         currentState = state;
     }
 

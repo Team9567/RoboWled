@@ -2,6 +2,8 @@
 
 Network-based communication pipe for WLED devices. Communicates over TCP, sending and receiving newline-delimited JSON.
 
+Implements the [WledPipe](wled-pipe.md) interface.
+
 ## Package
 
 ```java
@@ -269,7 +271,7 @@ import robowled.wledpipe.NetworkPipe;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.io.IOException;
 
-public class LEDSubsystem extends SubsystemBase {
+public class LedSubsystem extends SubsystemBase {
     private NetworkPipe wled;
     private boolean connected = false;
     
@@ -277,7 +279,7 @@ public class LEDSubsystem extends SubsystemBase {
     private static final String WLED_HOST = "wled-underglow.local";
     private static final int WLED_PORT = 21324;
 
-    public LEDSubsystem() {
+    public LedSubsystem() {
         connect();
     }
 
@@ -358,7 +360,9 @@ public class LEDSubsystem extends SubsystemBase {
 
 ## See Also
 
+- [WledPipe Interface](wled-pipe.md) - The interface NetworkPipe implements
 - [SerialPipe](serial-pipe.md) - For USB serial connections
+- [DummyPipe](dummy-pipe.md) - For testing and simulation
 - [Getting Started](../getting-started.md) - Basic usage guide
 - [WLED JSON API](https://kno.wled.ge/interfaces/json-api/) - Official WLED documentation
 

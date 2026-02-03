@@ -178,10 +178,10 @@ wled.sendString("{\"seg\":[{\"col\":[[255,0,0]],\"fx\":2,\"sx\":100}]}\n");
 Create helper methods for common operations:
 
 ```java
-public class LEDSubsystem extends SubsystemBase {
+public class LedSubsystem extends SubsystemBase {
     private final SerialPipe wled;
 
-    public LEDSubsystem() {
+    public LedSubsystem() {
         wled = new SerialPipe(SerialPort.Port.kUSB, 115200);
     }
 
