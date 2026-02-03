@@ -7,12 +7,6 @@
 
 ---
 
-## 📖 Documentation
-
-[RoboWled Gitbook](https://yagsl.gitbook.io/RoboWled/documentation)
-
----
-
 ## 🔧 Key Features
 
 - Supports both serial (e.g. via USB-serial) and networked (e.g. via ethernet) channels for control
