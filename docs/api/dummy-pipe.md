@@ -26,7 +26,7 @@ robowled.wledpipe.DummyPipe
 
 | Feature | Description |
 |---------|-------------|
-| **State Accumulation** | Sent JSON messages are parsed and merged into an internal state map |
+| **State Accumulation** | Sent JSON messages are parsed and merged into an accumulated JsonObject |
 | **Mock Responses** | Queue fake responses for testing receive logic |
 | **Send Callback** | Optional notification when messages are sent |
 | **Connection Simulation** | Simulate connected/disconnected states |
@@ -61,14 +61,16 @@ DummyPipe pipe = new DummyPipe(msg -> System.out.println("Sent: " + msg));
 
 ## State Accumulation
 
-When you send JSON messages, DummyPipe parses them and merges the values into an accumulated state map. This allows you to verify what state the WLED device would be in after a sequence of commands.
+When you send JSON messages, DummyPipe parses them and merges the values into an accumulated `JsonObject`. This allows you to verify what state the WLED device would be in after a sequence of commands.
+
+**Note:** Non-JSON strings (or invalid JSON) are silently ignored for accumulation purposes, but the send callback is still invoked.
 
 ### getAccumulatedState()
 
-Returns the full accumulated state map.
+Returns the full accumulated state as a JsonObject.
 
 ```java
-Map<String, Object> state = pipe.getAccumulatedState();
+JsonObject state = pipe.getAccumulatedState();
 ```
 
 **Example:**
@@ -80,8 +82,12 @@ pipe.sendString("{\"on\":true}\n");
 pipe.sendString("{\"bri\":255}\n");
 pipe.sendString("{\"ps\":3}\n");
 
-Map<String, Object> state = pipe.getAccumulatedState();
-// state = {"on": true, "bri": 255, "ps": 3}
+JsonObject state = pipe.getAccumulatedState();
+// state contains: {"on":true,"bri":255,"ps":3}
+
+assertTrue(state.get("on").getAsBoolean());
+assertEquals(255, state.get("bri").getAsInt());
+assertEquals(3, state.get("ps").getAsInt());
 ```
 
 ### getStateValue(String key)
@@ -89,17 +95,18 @@ Map<String, Object> state = pipe.getAccumulatedState();
 Gets a specific value from the accumulated state.
 
 ```java
-Object value = pipe.getStateValue("bri");  // Returns Integer 255
+JsonElement value = pipe.getStateValue("bri");  // Returns JsonPrimitive(255)
+int brightness = value.getAsInt();              // 255
 ```
 
-### getStateValue(String key, Class\<T> type)
+### hasStateValue(String key)
 
-Gets a value with type casting.
+Checks if a key exists in the accumulated state.
 
 ```java
-Boolean isOn = pipe.getStateValue("on", Boolean.class);      // true
-Integer brightness = pipe.getStateValue("bri", Integer.class); // 255
-Integer preset = pipe.getStateValue("ps", Integer.class);      // 3
+if (pipe.hasStateValue("on")) {
+    boolean isOn = pipe.getStateValue("on").getAsBoolean();
+}
 ```
 
 ### clearState()
@@ -126,13 +133,17 @@ pipe.queueResponse("{\"on\":true,\"bri\":128}");
 String response = pipe.tryReadString();  // Returns the queued response
 ```
 
-### queueResponseObject(Object obj)
+### queueResponse(JsonElement json)
 
-Queues a response by serializing an object to JSON.
+Queues a JsonElement response.
 
 ```java
-Map<String, Object> mockState = Map.of("on", true, "bri", 200);
-pipe.queueResponseObject(mockState);
+JsonObject mockState = new JsonObject();
+mockState.addProperty("on", true);
+mockState.addProperty("bri", 200);
+pipe.queueResponse(mockState);
+
+JsonElement response = pipe.tryReadGson();  // Returns the queued JsonObject
 ```
 
 ### clearResponses()
@@ -168,18 +179,34 @@ assertTrue(pipe.isConnected());
 Changes the send callback after construction.
 
 ```java
-List<String> sentMessages = new ArrayList<>();
-pipe.setSendCallback(sentMessages::add);
+List<String> captured = new ArrayList<>();
+pipe.setSendCallback(captured::add);
 
 pipe.sendString("{\"on\":true}\n");
-// sentMessages now contains the sent message
+// captured now contains the sent message
 ```
+
+---
+
+## Inherited Methods
+
+DummyPipe implements all methods from the [WledPipe](wled-pipe.html) interface:
+
+| Method | DummyPipe Behavior |
+|--------|-------------------|
+| `sendGson(JsonElement)` | Converts to string and calls `sendString()` |
+| `sendString(String)` | Invokes callback, then parses and merges JSON into accumulated state |
+| `tryReadString()` | Returns next queued mock response, or `null` if queue is empty |
+| `tryReadGson()` | Parses next queued response as JSON, or returns `null` |
+| `isConnected()` | Returns simulated connection state (default: `true`) |
+| `close()` | Sets connected to `false`, clears responses and accumulated state |
 
 ---
 
 ## Complete Example: Unit Testing
 
 ```java
+import com.google.gson.JsonObject;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -192,19 +219,7 @@ class LedSubsystemTest {
         
         leds.setPreset(5);
         
-        assertEquals(5, pipe.getStateValue("ps", Integer.class));
-    }
-    
-    @Test
-    void testSetColor() {
-        DummyPipe pipe = new DummyPipe();
-        LedSubsystem leds = new LedSubsystem(pipe);
-        
-        leds.setColor(255, 0, 0);  // Red
-        
-        // Verify the segment color was set
-        Map<String, Object> state = pipe.getAccumulatedState();
-        assertNotNull(state.get("seg"));
+        assertEquals(5, pipe.getStateValue("ps").getAsInt());
     }
     
     @Test
@@ -217,9 +232,21 @@ class LedSubsystemTest {
         leds.setPreset(3);
         
         // All values should be accumulated
-        assertTrue(pipe.getStateValue("on", Boolean.class));
-        assertEquals(200, pipe.getStateValue("bri", Integer.class));
-        assertEquals(3, pipe.getStateValue("ps", Integer.class));
+        JsonObject state = pipe.getAccumulatedState();
+        assertTrue(state.get("on").getAsBoolean());
+        assertEquals(200, state.get("bri").getAsInt());
+        assertEquals(3, state.get("ps").getAsInt());
+    }
+    
+    @Test
+    void testStateOverwrite() {
+        DummyPipe pipe = new DummyPipe();
+        LedSubsystem leds = new LedSubsystem(pipe);
+        
+        leds.setBrightness(100);
+        leds.setBrightness(200);  // Overwrites previous value
+        
+        assertEquals(200, pipe.getStateValue("bri").getAsInt());
     }
     
     @Test
@@ -235,7 +262,7 @@ class LedSubsystemTest {
 }
 ```
 
-## Complete Example: Simulation with Logging
+## Complete Example: Simulation with Dashboard
 
 ```java
 public class Robot extends TimedRobot {
@@ -245,7 +272,7 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         if (RobotBase.isSimulation()) {
-            // Use DummyPipe in simulation
+            // Use DummyPipe in simulation with logging
             simulationPipe = new DummyPipe(msg -> 
                 System.out.println("[WLED SIM] " + msg.trim())
             );
@@ -260,13 +287,19 @@ public class Robot extends TimedRobot {
     
     @Override
     public void simulationPeriodic() {
-        // Log current simulated LED state
+        // Publish simulated LED state to dashboard
         if (simulationPipe != null) {
-            Map<String, Object> state = simulationPipe.getAccumulatedState();
-            SmartDashboard.putBoolean("LED/On", 
-                Boolean.TRUE.equals(state.get("on")));
-            SmartDashboard.putNumber("LED/Brightness", 
-                state.get("bri") != null ? (Integer) state.get("bri") : 0);
+            JsonObject state = simulationPipe.getAccumulatedState();
+            
+            if (state.has("on")) {
+                SmartDashboard.putBoolean("LED/On", state.get("on").getAsBoolean());
+            }
+            if (state.has("bri")) {
+                SmartDashboard.putNumber("LED/Brightness", state.get("bri").getAsInt());
+            }
+            if (state.has("ps")) {
+                SmartDashboard.putNumber("LED/Preset", state.get("ps").getAsInt());
+            }
         }
     }
 }

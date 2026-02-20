@@ -10,5 +10,7 @@
  * </ul>
  * 
  * <p>All pipes communicate using newline-delimited JSON messages.
+ * Use {@link WledPipe#sendGson(com.google.gson.JsonElement)} to send Gson JSON objects,
+ * or {@link WledPipe#sendString(String)} to send raw strings.
  */
 package robowled.wledpipe;

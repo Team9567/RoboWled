@@ -18,10 +18,10 @@ When developing robot code, you often don't have access to the actual hardware:
 
 `DummyPipe` solves this by providing a mock implementation of `WledPipe` that:
 
-1. Accumulates sent JSON into a state map you can inspect
+1. Accumulates sent JSON into a merged state object you can inspect
 2. Allows queuing mock responses
 3. Simulates connection states
-4. Optionally logs all sent messages
+4. Optionally logs all sent messages via a callback
 
 ---
 
@@ -138,6 +138,8 @@ public class RobotContainer {
 Track LED state on your dashboard during simulation:
 
 ```java
+import com.google.gson.JsonObject;
+
 public class Robot extends TimedRobot {
     private RobotContainer robotContainer;
     
@@ -150,19 +152,17 @@ public class Robot extends TimedRobot {
     public void simulationPeriodic() {
         DummyPipe simPipe = robotContainer.getSimulationPipe();
         if (simPipe != null) {
-            Map<String, Object> state = simPipe.getAccumulatedState();
+            JsonObject state = simPipe.getAccumulatedState();
             
-            // Publish LED state to SmartDashboard
-            SmartDashboard.putBoolean("Sim/LED/On", 
-                Boolean.TRUE.equals(state.get("on")));
-            
-            Object bri = state.get("bri");
-            SmartDashboard.putNumber("Sim/LED/Brightness", 
-                bri != null ? ((Number) bri).intValue() : 0);
-            
-            Object ps = state.get("ps");
-            SmartDashboard.putNumber("Sim/LED/Preset", 
-                ps != null ? ((Number) ps).intValue() : -1);
+            if (state.has("on")) {
+                SmartDashboard.putBoolean("Sim/LED/On", state.get("on").getAsBoolean());
+            }
+            if (state.has("bri")) {
+                SmartDashboard.putNumber("Sim/LED/Brightness", state.get("bri").getAsInt());
+            }
+            if (state.has("ps")) {
+                SmartDashboard.putNumber("Sim/LED/Preset", state.get("ps").getAsInt());
+            }
         }
     }
 }
@@ -170,7 +170,7 @@ public class Robot extends TimedRobot {
 
 ### Glass/Shuffleboard Visualization
 
-You can create a visual representation of your LEDs using the published values:
+You can create a visual representation of your LEDs using the accumulated state:
 
 1. Add boolean indicator for On/Off
 2. Add number display for Brightness (0-255)
@@ -200,25 +200,25 @@ class LedSubsystemTest {
     @Test
     void testTurnOn() {
         leds.turnOn();
-        assertTrue(pipe.getStateValue("on", Boolean.class));
+        assertTrue(pipe.getStateValue("on").getAsBoolean());
     }
     
     @Test
     void testTurnOff() {
         leds.turnOff();
-        assertFalse(pipe.getStateValue("on", Boolean.class));
+        assertFalse(pipe.getStateValue("on").getAsBoolean());
     }
     
     @Test
     void testSetBrightness() {
         leds.setBrightness(128);
-        assertEquals(128, pipe.getStateValue("bri", Integer.class));
+        assertEquals(128, pipe.getStateValue("bri").getAsInt());
     }
     
     @Test
     void testSetPreset() {
         leds.setPreset(5);
-        assertEquals(5, pipe.getStateValue("ps", Integer.class));
+        assertEquals(5, pipe.getStateValue("ps").getAsInt());
     }
 }
 ```
@@ -233,26 +233,26 @@ void testAllianceColorSequence() {
     leds.setBrightness(255);
     leds.setColor(255, 0, 0);  // Red
     
-    Map<String, Object> state = pipe.getAccumulatedState();
+    JsonObject state = pipe.getAccumulatedState();
     
-    assertTrue((Boolean) state.get("on"));
-    assertEquals(255, state.get("bri"));
-    assertNotNull(state.get("seg"));  // Color was set
+    assertTrue(state.get("on").getAsBoolean());
+    assertEquals(255, state.get("bri").getAsInt());
+    assertTrue(state.has("seg"));  // Color was set
 }
 
 @Test
 void testStateAccumulation() {
-    // Multiple commands should accumulate
+    // Multiple commands accumulate into final state
     leds.turnOn();
     leds.setBrightness(100);
     leds.setPreset(1);
-    leds.setBrightness(200);  // Update brightness
+    leds.setBrightness(200);  // Overwrites previous brightness
     
-    // Final state should reflect all changes
-    Map<String, Object> state = pipe.getAccumulatedState();
-    assertTrue((Boolean) state.get("on"));
-    assertEquals(200, state.get("bri"));  // Updated value
-    assertEquals(1, state.get("ps"));
+    // Final state reflects merged values
+    JsonObject state = pipe.getAccumulatedState();
+    assertTrue(state.get("on").getAsBoolean());
+    assertEquals(200, state.get("bri").getAsInt());  // Latest value
+    assertEquals(1, state.get("ps").getAsInt());
 }
 ```
 
@@ -304,23 +304,14 @@ void testReadingState() throws Exception {
 }
 
 @Test
-void testDeserializingResponse() throws Exception {
-    // Queue a typed response
-    Map<String, Object> mockState = new HashMap<>();
-    mockState.put("on", true);
-    mockState.put("bri", 200);
-    pipe.queueResponseObject(mockState);
+void testMultipleResponses() throws Exception {
+    // Queue multiple responses (returned in FIFO order)
+    pipe.queueResponse("{\"on\":true}");
+    pipe.queueResponse("{\"bri\":200}");
     
-    // Deserialize response
-    WledState state = pipe.tryReadObject(WledState.class);
-    assertTrue(state.on);
-    assertEquals(200, state.bri);
-}
-
-// Response class
-static class WledState {
-    public boolean on;
-    public int bri;
+    assertEquals("{\"on\":true}", pipe.tryReadString());
+    assertEquals("{\"bri\":200}", pipe.tryReadString());
+    assertNull(pipe.tryReadString());  // No more responses
 }
 ```
 
@@ -365,10 +356,10 @@ void tearDown() {
 @Test
 void testBrightnessLimits() {
     leds.setBrightness(0);
-    assertEquals(0, pipe.getStateValue("bri", Integer.class));
+    assertEquals(0, pipe.getStateValue("bri").getAsInt());
     
     leds.setBrightness(255);
-    assertEquals(255, pipe.getStateValue("bri", Integer.class));
+    assertEquals(255, pipe.getStateValue("bri").getAsInt());
 }
 ```
 
@@ -379,7 +370,7 @@ void testBrightnessLimits() {
 void testPresetActivation() {
     leds.setPreset(5);
     
-    assertEquals(5, pipe.getStateValue("ps", Integer.class),
+    assertEquals(5, pipe.getStateValue("ps").getAsInt(),
         "Preset 5 should be active after setPreset(5)");
 }
 ```

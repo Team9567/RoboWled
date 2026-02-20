@@ -27,21 +27,21 @@ robowled.wledpipe.WledPipe
 
 ## Interface Methods
 
-### sendObject(Object obj)
+### sendGson(JsonElement json)
 
-Sends an object as JSON, followed by a newline.
+Sends a Gson JsonElement as JSON text, followed by a newline.
 
 ```java
-void sendObject(Object obj) throws Exception;
+void sendGson(JsonElement json) throws Exception;
 ```
 
 **Parameters:**
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `obj` | `Object` | The object to serialize and send |
+| `json` | `JsonElement` | The Gson JSON element to send (JsonObject, JsonArray, etc.) |
 
-**Throws:** `Exception` if serialization or sending fails
+**Throws:** `Exception` if sending fails
 
 ---
 
@@ -77,29 +77,17 @@ String tryReadString() throws Exception;
 
 ---
 
-### tryReadObject(Class\<T> clazz)
+### tryReadGson()
 
-Non-blocking read that deserializes a complete JSON line into the specified type.
+Non-blocking read that parses the response as a Gson JsonElement.
 
 ```java
-<T> T tryReadObject(Class<T> clazz) throws Exception;
+JsonElement tryReadGson() throws Exception;
 ```
 
-**Type Parameters:**
+**Returns:** A parsed `JsonElement`, or `null` if no complete line is available
 
-| Parameter | Description |
-|-----------|-------------|
-| `T` | The type to return |
-
-**Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `clazz` | `Class<T>` | The class to deserialize into |
-
-**Returns:** A deserialized object, or `null` if no complete line is available
-
-**Throws:** `Exception` if reading or deserialization fails
+**Throws:** `Exception` if reading or parsing fails
 
 ---
 
@@ -177,9 +165,9 @@ LedSubsystem leds = new LedSubsystem(
 DummyPipe mockPipe = new DummyPipe();
 LedSubsystem leds = new LedSubsystem(mockPipe);
 
-// Verify commands were sent correctly
+// Verify accumulated state after commands
 leds.setBrightness(200);
-assertEquals(200, mockPipe.getStateValue("bri", Integer.class));
+assertEquals(200, mockPipe.getStateValue("bri").getAsInt());
 ```
 
 ## See Also

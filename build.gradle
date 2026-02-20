@@ -43,10 +43,8 @@ dependencies {
     compileOnly "edu.wpi.first.wpiutil:wpiutil-java:$wpilibVersion"
     compileOnly "edu.wpi.first.hal:hal-java:$wpilibVersion"
     
-    // Jackson for JSON serialization (included in artifact)
-    implementation "com.fasterxml.jackson.core:jackson-annotations:2.19.2"
-    implementation "com.fasterxml.jackson.core:jackson-core:2.19.2"
-    implementation "com.fasterxml.jackson.core:jackson-databind:2.19.2"
+    // Gson for JSON serialization
+    implementation 'com.google.code.gson:gson:2.11.0'
 
     // Test dependencies
     testImplementation platform("org.junit:junit-bom:5.11.4")

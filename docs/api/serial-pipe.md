@@ -54,27 +54,29 @@ SerialPipe wled = new SerialPipe(SerialPort.Port.kUSB, 115200);
 
 *All methods are defined by the [WledPipe](wled-pipe.html) interface.*
 
-### sendObject(Object obj)
+### sendGson(JsonElement json)
 
-Sends an object as JSON over the serial port, followed by a newline.
+Sends a Gson JsonElement as JSON over the serial port, followed by a newline.
 
 **Parameters:**
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `obj` | `Object` | The object to serialize and send |
+| `json` | `JsonElement` | The Gson JSON element to send |
 
-**Throws:** `Exception` if serialization or sending fails
+**Throws:** `Exception` if sending fails
 
 **Example:**
 
 ```java
-// Using a Map to build JSON
-Map<String, Object> command = new HashMap<>();
-command.put("on", true);
-command.put("bri", 255);
+import com.google.gson.JsonObject;
 
-wled.sendObject(command);
+// Build a JSON command using Gson
+JsonObject command = new JsonObject();
+command.addProperty("on", true);
+command.addProperty("bri", 255);
+
+wled.sendGson(command);
 // Sends: {"on":true,"bri":255}\n
 ```
 
@@ -131,40 +133,34 @@ public void periodic() {
 
 ---
 
-### tryReadObject(Class\<T> clazz)
+### tryReadGson()
 
-Non-blocking read that deserializes a complete JSON line into the specified type.
+Non-blocking read that parses the response as a Gson JsonElement.
 
-**Type Parameters:**
+**Returns:** `JsonElement` - A parsed JSON element, or `null` if no complete line is available
 
-| Parameter | Description |
-|-----------|-------------|
-| `T` | The type to return |
-
-**Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `clazz` | `Class<T>` | The class to deserialize into |
-
-**Returns:** `T` - A deserialized object, or `null` if no complete line is available
-
-**Throws:** `Exception` if reading or deserialization fails
+**Throws:** `Exception` if reading or parsing fails
 
 **Example:**
 
 ```java
-// Define a response class
-public class WledState {
-    public boolean on;
-    public int bri;
-}
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
-// Read and deserialize
-WledState state = wled.tryReadObject(WledState.class);
-if (state != null) {
-    System.out.println("WLED is " + (state.on ? "on" : "off"));
-    System.out.println("Brightness: " + state.bri);
+// In a periodic method
+@Override
+public void periodic() {
+    try {
+        JsonElement response = wled.tryReadGson();
+        if (response != null && response.isJsonObject()) {
+            JsonObject state = response.getAsJsonObject();
+            boolean isOn = state.get("on").getAsBoolean();
+            int brightness = state.get("bri").getAsInt();
+            System.out.println("WLED on=" + isOn + ", bri=" + brightness);
+        }
+    } catch (Exception e) {
+        // Handle error
+    }
 }
 ```
 

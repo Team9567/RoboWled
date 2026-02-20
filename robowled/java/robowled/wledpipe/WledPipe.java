@@ -1,5 +1,7 @@
 package robowled.wledpipe;
 
+import com.google.gson.JsonElement;
+
 /**
  * Common interface for WLED communication pipes.
  * 
@@ -10,12 +12,12 @@ package robowled.wledpipe;
 public interface WledPipe {
 
     /**
-     * Sends an object as JSON, followed by a newline.
+     * Sends a Gson JsonElement as JSON text, followed by a newline.
      *
-     * @param obj the object to serialize and send
-     * @throws Exception if serialization or sending fails
+     * @param json the JsonElement to send (JsonObject, JsonArray, etc.)
+     * @throws Exception if sending fails
      */
-    void sendObject(Object obj) throws Exception;
+    void sendGson(JsonElement json) throws Exception;
 
     /**
      * Sends a raw string.
@@ -34,15 +36,13 @@ public interface WledPipe {
     String tryReadString() throws Exception;
 
     /**
-     * Non-blocking read: call periodically; returns null if no full object yet.
-     * Deserializes a complete JSON line into the specified type.
+     * Non-blocking read that parses the response as a Gson JsonElement.
+     * Call periodically; returns null if no full line yet.
      *
-     * @param clazz the class to deserialize into
-     * @param <T>   the type to return
-     * @return a deserialized object, or null if no complete line is available
-     * @throws Exception if reading or deserialization fails
+     * @return a parsed JsonElement, or null if no complete line is available
+     * @throws Exception if reading or parsing fails
      */
-    <T> T tryReadObject(Class<T> clazz) throws Exception;
+    JsonElement tryReadGson() throws Exception;
 
     /**
      * Checks if the pipe is connected and ready for communication.

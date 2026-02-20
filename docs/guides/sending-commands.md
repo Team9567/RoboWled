@@ -231,24 +231,37 @@ public class LedSubsystem extends SubsystemBase {
 
 ---
 
-## Using Objects Instead of Strings
+## Using Gson Objects Instead of Strings
 
-For complex commands, use Java objects with Jackson serialization:
+For complex commands, use Gson's `JsonObject` to build JSON programmatically:
 
 ```java
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
-public void setColorWithObject(int r, int g, int b) {
+public void setColorWithGson(int r, int g, int b) {
     try {
-        Map<String, Object> segment = new HashMap<>();
-        segment.put("col", List.of(List.of(r, g, b)));
-
-        Map<String, Object> command = new HashMap<>();
-        command.put("seg", List.of(segment));
-
-        wled.sendObject(command);
+        // Build the color array: [[r, g, b]]
+        JsonArray rgb = new JsonArray();
+        rgb.add(r);
+        rgb.add(g);
+        rgb.add(b);
+        
+        JsonArray colors = new JsonArray();
+        colors.add(rgb);
+        
+        // Build the segment object
+        JsonObject segment = new JsonObject();
+        segment.add("col", colors);
+        
+        JsonArray segments = new JsonArray();
+        segments.add(segment);
+        
+        // Build the command
+        JsonObject command = new JsonObject();
+        command.add("seg", segments);
+        
+        wled.sendGson(command);
     } catch (Exception e) {
         System.err.println("Failed to send: " + e.getMessage());
     }

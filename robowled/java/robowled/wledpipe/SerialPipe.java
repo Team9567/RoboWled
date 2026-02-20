@@ -1,7 +1,7 @@
 package robowled.wledpipe;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import edu.wpi.first.wpilibj.SerialPort;
 
 import java.nio.charset.StandardCharsets;
@@ -12,7 +12,6 @@ import java.nio.charset.StandardCharsets;
  */
 public class SerialPipe implements WledPipe {
     private final SerialPort port;
-    private final ObjectMapper mapper;
     private boolean closed = false;
 
     // Simple receive buffer (you can make this more robust if you expect high traffic)
@@ -28,18 +27,14 @@ public class SerialPipe implements WledPipe {
         port = new SerialPort(baudRate, usbPort);
         port.setTimeout(0.02); // seconds
         port.setReadBufferSize(256);
-
-        mapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void sendObject(Object obj) throws Exception {
-        String json = mapper.writeValueAsString(obj);
-        String line = json + "\n";
+    public void sendGson(JsonElement json) throws Exception {
+        String line = json.toString() + "\n";
         sendString(line);
     }
 
@@ -76,11 +71,10 @@ public class SerialPipe implements WledPipe {
      * {@inheritDoc}
      */
     @Override
-    public <T> T tryReadObject(Class<T> clazz) throws Exception {
+    public JsonElement tryReadGson() throws Exception {
         String line = tryReadString();
-
         if (line == null) return null;
-        return mapper.readValue(line, clazz);
+        return JsonParser.parseString(line);
     }
 
     /**

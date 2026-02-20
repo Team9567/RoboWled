@@ -1,10 +1,9 @@
 package robowled.wledpipe;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
@@ -15,7 +14,7 @@ import java.util.function.Consumer;
  * 
  * <p>This pipe doesn't communicate with any real device. Instead, it:
  * <ul>
- *   <li>Accumulates sent JSON values into a state map</li>
+ *   <li>Accumulates sent JSON into a merged state object</li>
  *   <li>Optionally notifies a callback when messages are sent</li>
  *   <li>Allows injection of mock responses for testing receive logic</li>
  *   <li>Always reports as "connected" (unless explicitly set otherwise)</li>
@@ -29,9 +28,8 @@ import java.util.function.Consumer;
  * </ul>
  */
 public class DummyPipe implements WledPipe {
-    private final ObjectMapper mapper;
     private final Queue<String> mockResponses = new LinkedList<>();
-    private final Map<String, Object> accumulatedState = new HashMap<>();
+    private JsonObject accumulatedState = new JsonObject();
     private Consumer<String> sendCallback;
     private boolean connected = true;
 
@@ -50,8 +48,6 @@ public class DummyPipe implements WledPipe {
      */
     public DummyPipe(Consumer<String> sendCallback) {
         this.sendCallback = sendCallback;
-        this.mapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     /**
@@ -66,12 +62,12 @@ public class DummyPipe implements WledPipe {
     /**
      * Gets the accumulated state from all sent JSON messages.
      * 
-     * <p>Each sent JSON object's properties are merged into this map.
+     * <p>Each sent JSON object's properties are merged into this object.
      * Later values overwrite earlier values for the same key.
      *
-     * @return the accumulated state map (modifiable)
+     * @return the accumulated state as a JsonObject
      */
-    public Map<String, Object> getAccumulatedState() {
+    public JsonObject getAccumulatedState() {
         return accumulatedState;
     }
 
@@ -79,32 +75,27 @@ public class DummyPipe implements WledPipe {
      * Gets a specific value from the accumulated state.
      *
      * @param key the JSON property name
-     * @return the value, or null if not set
+     * @return the JsonElement value, or null if not set
      */
-    public Object getStateValue(String key) {
+    public JsonElement getStateValue(String key) {
         return accumulatedState.get(key);
     }
 
     /**
-     * Gets a specific value from the accumulated state, cast to the expected type.
+     * Checks if the accumulated state contains a specific key.
      *
      * @param key the JSON property name
-     * @param type the expected type
-     * @param <T> the type to return
-     * @return the value cast to the specified type, or null if not set
+     * @return true if the key exists in the accumulated state
      */
-    @SuppressWarnings("unchecked")
-    public <T> T getStateValue(String key, Class<T> type) {
-        Object value = accumulatedState.get(key);
-        if (value == null) return null;
-        return (T) value;
+    public boolean hasStateValue(String key) {
+        return accumulatedState.has(key);
     }
 
     /**
      * Clears the accumulated state.
      */
     public void clearState() {
-        accumulatedState.clear();
+        accumulatedState = new JsonObject();
     }
 
     /**
@@ -118,14 +109,12 @@ public class DummyPipe implements WledPipe {
     }
 
     /**
-     * Queues a mock JSON response by serializing the given object.
+     * Queues a mock JSON response.
      *
-     * @param obj the object to serialize and queue as a response
-     * @throws Exception if serialization fails
+     * @param json the JsonElement to queue as a response
      */
-    public void queueResponseObject(Object obj) throws Exception {
-        String json = mapper.writeValueAsString(obj);
-        mockResponses.add(json);
+    public void queueResponse(JsonElement json) {
+        mockResponses.add(json.toString());
     }
 
     /**
@@ -148,36 +137,44 @@ public class DummyPipe implements WledPipe {
      * {@inheritDoc}
      */
     @Override
-    public void sendObject(Object obj) throws Exception {
-        String json = mapper.writeValueAsString(obj);
-        String line = json + "\n";
+    public void sendGson(JsonElement json) throws Exception {
+        String line = json.toString() + "\n";
         sendString(line);
     }
 
     /**
      * {@inheritDoc}
      * 
-     * <p>In DummyPipe, this parses the string as JSON and merges the values
-     * into the accumulated state. If parsing fails (e.g., not valid JSON),
-     * the string is ignored for accumulation but the callback is still invoked.
+     * <p>In DummyPipe, this parses the string as JSON and merges it into
+     * the accumulated state. Non-JSON strings are ignored for accumulation
+     * but the callback is still invoked.
      */
     @Override
     public void sendString(String str) throws Exception {
-        // Notify callback if set
         if (sendCallback != null) {
             sendCallback.accept(str);
         }
 
-        // Try to parse and accumulate JSON
+        // Try to parse and merge JSON
         String trimmed = str.trim();
         if (trimmed.startsWith("{")) {
             try {
-                Map<String, Object> parsed = mapper.readValue(trimmed, 
-                        new TypeReference<Map<String, Object>>() {});
-                accumulatedState.putAll(parsed);
+                JsonElement parsed = JsonParser.parseString(trimmed);
+                if (parsed.isJsonObject()) {
+                    mergeInto(accumulatedState, parsed.getAsJsonObject());
+                }
             } catch (Exception e) {
                 // Not valid JSON - ignore for accumulation
             }
+        }
+    }
+
+    /**
+     * Merges source JsonObject into target, overwriting existing keys.
+     */
+    private void mergeInto(JsonObject target, JsonObject source) {
+        for (Map.Entry<String, JsonElement> entry : source.entrySet()) {
+            target.add(entry.getKey(), entry.getValue());
         }
     }
 
@@ -194,13 +191,15 @@ public class DummyPipe implements WledPipe {
 
     /**
      * {@inheritDoc}
+     * 
+     * <p>In DummyPipe, this parses the next queued mock response as JSON,
+     * or returns null if no responses are queued.
      */
     @Override
-    public <T> T tryReadObject(Class<T> clazz) throws Exception {
+    public JsonElement tryReadGson() throws Exception {
         String line = tryReadString();
-
         if (line == null) return null;
-        return mapper.readValue(line, clazz);
+        return JsonParser.parseString(line);
     }
 
     /**
@@ -224,6 +223,6 @@ public class DummyPipe implements WledPipe {
     public void close() {
         connected = false;
         mockResponses.clear();
-        accumulatedState.clear();
+        accumulatedState = new JsonObject();
     }
 }
